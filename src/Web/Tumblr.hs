@@ -5,6 +5,8 @@ module Web.Tumblr where
 import Control.Applicative
 import Control.Arrow
 import Control.Monad.Reader
+import Control.Monad.Trans.Control (MonadBaseControl)
+import Control.Monad.Trans.Resource (MonadResource)
 
 import Data.Aeson
 import Data.Attoparsec
@@ -79,8 +81,8 @@ tumblrAuthorize oauth mgr = do
   cred <- getAccessToken oauth tempCred' mgr
   return cred
 
-tumblrBaseRequest :: Request m
-tumblrBaseRequest = def {
+tumblrBaseRequest :: Request
+tumblrBaseRequest = defaultRequest {
   host = B.pack "api.tumblr.com"
   }
 
@@ -118,10 +120,7 @@ tumblrAvatar :: (MonadBaseControl IO m, MonadResource m)
                -> Manager -> m LB.ByteString
 tumblrAvatar baseHostname msize manager = do
   let myRequest = tumblrBaseRequest {path = B.pack "/v2/blog/" <> baseHostname <> B.pack "/avatar" <> 
-                                            maybe B.empty (B.pack . show . getAvatarSize) msize,
-                                     checkStatus = \stat -> if stat == movedPermanently301 
-                                                           then const (const Nothing) 
-                                                           else checkStatus def stat
+                                            maybe B.empty (B.pack . show . getAvatarSize) msize
                                     } 
   resp <- responseBody <$> http myRequest manager
   resp $$+- CB.sinkLbs

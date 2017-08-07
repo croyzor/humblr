@@ -6,9 +6,8 @@ import Data.Aeson
 import Control.Applicative ((<$>), (<*>), empty, pure)
 
 import Data.Time(UTCTime,ZonedTime)
-import Data.Time.Format(parseTime)
+import Data.Time.Format(parseTimeM,defaultTimeLocale)
 import Data.Time.LocalTime(zonedTimeToUTC)
-import System.Locale(defaultTimeLocale)
 
 -- for reference, visit http://www.tumblr.com/docs/en/api/v2
 
@@ -234,7 +233,7 @@ instance FromJSON Post where
                                                               v .: "answer"
                              parseJSONTypeSpecific _ = fail "Invalid post type."
                              
-                             parseTumblrTime t = case parseTime defaultTimeLocale "%F %X %Z" t of
+                             parseTumblrTime t = case parseTimeM True defaultTimeLocale "%F %X %Z" t of
                                Just t' -> pure (zonedTimeToUTC t')
                                Nothing -> fail "Could not parse date"
                              
