@@ -10,6 +10,7 @@ Usage
 {-# LANGUAGE OverloadedStrings #-}
 
 import qualified Network.HTTP.Conduit as NetConduit
+import Network.HTTP.Client (defaultManagerSettings)
 import qualified Web.Tumblr as Tumblr
 import qualified Web.Tumblr.Types as Tumblr.Types
 import Control.Monad.Trans.Resource
@@ -22,7 +23,7 @@ apiKey = "[the API key you get after registering an app with Tumblr]"
 getTumblrInfo mgr hostname = runResourceT $ runReaderT (Tumblr.tumblrInfo hostname mgr) apiKey
 
 main = do  
-  mgr <- NetConduit.newManager NetConduit.def
+  mgr <- NetConduit.newManager defaultManagerSettings
   val <- getTumblrInfo mgr "someblog.tumblr.com"
   NetConduit.closeManager mgr
   print val
